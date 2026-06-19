@@ -1,0 +1,16 @@
+<%= form_with(model: post, local: true) do |form| %>
+  <div>
+    <%= form.label :title, "Заголовок" %>
+    <%= form.text_field :title, placeholder: "Введіть заголовок..." %>
+  </div>
+
+  <div>
+    <%= form.label :content, "Текст поста" %>
+    <%= form.text_area :content, placeholder: "Напишіть щось цікаве..." %>
+  </div>
+
+  <div style="display: flex; gap: 10px; margin-top: 10px;">
+    <%= form.submit "Зберегти пост", class: 'btn btn-primary' %>
+    <%= link_to 'Скасувати', posts_path, class: 'btn btn-back', style: 'width: 100%; text-align: center;' %>
+  </div>
+<% end %>

@@ -1,0 +1,9 @@
+<div class="card">
+  <h1 style="color: var(--primary); margin-top:0;"><%= @post.title %></h1>
+  <p style="font-size: 16px; line-height: 1.6;"><%= @post.content %></p>
+  
+  <div class="post-actions">
+    <%= link_to 'Назад', posts_path, class: 'btn btn-back' %>
+    <%= link_to 'Редагувати', edit_post_path(@post), class: 'btn btn-edit' %>
+  </div>
+</div>

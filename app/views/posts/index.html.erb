@@ -1,0 +1,21 @@
+<div class="header">
+  <h1>💎 Ruby Blog</h1>
+  <p style="color: var(--text-muted);">Всі публікації</p>
+</div>
+
+<div style="margin-bottom: 20px;">
+  <%= link_to 'Створити новий пост', new_post_path, class: 'btn btn-primary' %>
+</div>
+
+<% @posts.each do |post| %>
+  <div class="card">
+    <h3 style="margin-top:0;"><%= post.title %></h3>
+    <p style="color: var(--text-muted);"><%= truncate(post.content, length: 150) %></p>
+    
+    <div class="post-actions">
+      <%= link_to 'Читати', post, class: 'btn btn-primary', style: 'width: auto;' %>
+      <%= link_to 'Редагувати', edit_post_path(post), class: 'btn btn-edit' %>
+      <%= button_to 'Видалити', post, method: :delete, data: { turbo_confirm: 'Впевнені?' }, class: 'btn btn-del' %>
+    </div>
+  </div>
+<% end %>

@@ -1,0 +1,124 @@
+<style>
+    :root {
+        --primary: #cc342d;
+        --primary-hover: #a82721;
+        --bg-color: #f8f9fa;
+        --surface: #ffffff;
+        --text-main: #202124;
+        --text-muted: #5f6368;
+        --border: #e0e0e0;
+        --edit-btn: #f59e0b;
+        --edit-btn-hover: #d97706;
+        --del-btn: #64748b;
+        --del-btn-hover: #475569;
+    }
+
+    .blog-wrapper { font-family: 'Inter', sans-serif; display: flex; justify-content: center; padding: 40px 20px; }
+    .container { width: 100%; max-width: 600px; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .header h1 { color: var(--primary); font-weight: 700; margin: 0 0 10px 0; }
+    
+    .editor-card { background: var(--surface); padding: 24px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); margin-bottom: 30px; border: 1px solid var(--border); }
+    input, textarea { width: 100%; padding: 12px 16px; margin-bottom: 16px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; box-sizing: border-box; }
+    input:focus, textarea:focus { outline: none; border-color: var(--primary); }
+    textarea { resize: vertical; min-height: 100px; }
+    
+    button { font-weight: 600; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; }
+    .btn-primary { background-color: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover { background-color: var(--primary-hover); }
+
+    .posts-header { font-size: 18px; font-weight: 600; margin-bottom: 15px; color: var(--text-muted); }
+    .post-card { background: var(--surface); border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); border: 1px solid var(--border); }
+    .post-title { margin: 0 0 10px 0; font-size: 20px; color: var(--text-main); }
+    .post-content { color: var(--text-muted); line-height: 1.6; margin: 0 0 20px 0; }
+    
+    .post-actions { display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 15px; }
+    .btn-edit { background-color: var(--edit-btn); color: white; padding: 8px 16px; }
+    .btn-del { background-color: var(--del-btn); color: white; padding: 8px 16px; }
+</style>
+
+<div class="blog-wrapper">
+    <div class="container">
+        <div class="header">
+            <h1>💎 Ruby on Rails Blog</h1>
+            <p style="color: var(--text-muted); margin: 0;">Сучасний CRUD застосунок на Rails</p>
+        </div>
+
+        <div class="editor-card">
+            <input type="hidden" id="postId">
+            <input type="text" id="title" placeholder="Введіть заголовок поста...">
+            <textarea id="content" placeholder="Напишіть щось цікаве..."></textarea>
+            <button class="btn-primary" onclick="savePost()" id="mainBtn">Створити пост</button>
+        </div>
+
+        <div class="posts-header">Останні публікації</div>
+        <div id="postsList"></div>
+    </div>
+</div>
+
+<script>
+    async function loadPosts() {
+        const r = await fetch('/api/posts');
+        const posts = await r.json();
+        
+        if (posts.length === 0) {
+            document.getElementById('postsList').innerHTML = '<p style="text-align:center; color: #5f6368;">Постів поки немає. Створіть перший!</p>';
+            return;
+        }
+
+        document.getElementById('postsList').innerHTML = posts.map(p => `
+            <div class="post-card">
+                <h3 class="post-title">${p.title}</h3>
+                <p class="post-content">${p.content}</p>
+                <div class="post-actions">
+                    <button class="btn-edit" onclick="editPost(${p.id}, '${p.title.replace(/'/g, "\\'")}', '${p.content.replace(/'/g, "\\'")}')">Редагувати</button>
+                    <button class="btn-del" onclick="deletePost(${p.id})">Видалити</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function savePost() {
+        const id = document.getElementById('postId').value;
+        const title = document.getElementById('title').value;
+        const content = document.getElementById('content').value;
+        
+        if (!title || !content) return alert("Заповніть всі поля!");
+
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `/api/posts/${id}` : '/api/posts';
+
+        await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, content })
+        });
+
+        resetForm();
+        loadPosts();
+    }
+
+    async function deletePost(id) {
+        if(confirm('Видалити цей пост?')) {
+            await fetch(`/api/posts/${id}`, { method: 'DELETE' });
+            loadPosts();
+        }
+    }
+
+    function editPost(id, t, c) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.getElementById('postId').value = id;
+        document.getElementById('title').value = t;
+        document.getElementById('content').value = c;
+        document.getElementById('mainBtn').innerText = 'Зберегти зміни';
+    }
+
+    function resetForm() {
+        document.getElementById('postId').value = '';
+        document.getElementById('title').value = '';
+        document.getElementById('content').value = '';
+        document.getElementById('mainBtn').innerText = 'Створити пост';
+    }
+
+    loadPosts();
+</script>
